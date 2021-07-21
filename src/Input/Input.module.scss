@@ -1,0 +1,13 @@
+input {
+    font-size: 30px;
+    height: 40px;
+
+    &[type="text"] {
+        width: 300px;
+    }
+
+    &[type="submit"] {
+        margin-top: 7px;
+        width: 125px;
+    }
+}
