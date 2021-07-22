@@ -3,13 +3,14 @@ import { useState, useEffect, useRef } from 'react';
 import styles from './Root.module.scss';
 
 import Form from '../Form/Form';
-import Card from '../Card/Card';
+import List from '../List/List';
 
 function Root() {
 
   const [inputValue, setInputValue] = useState('');
   const [selectValue, setSelectValue] = useState('artist');
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
+  const [type, setType] = useState('');
   const [token, setToken] = useState('');
 
   const refreshToken = process.env.REACT_APP_REFRESH_TOKEN;
@@ -49,7 +50,6 @@ function Root() {
   const handleClick = (e) => {
     e.preventDefault();
     e.target.children[0].value = "";
-    console.log(inputValue);
     fetch(`https://api.spotify.com/v1/search?q=${inputValue}&type=${selectValue}`, {
       method: 'GET', headers: {
         'Accept': 'application/json',
@@ -59,14 +59,9 @@ function Root() {
     })
       .then(res => res.json())
       .then(data => {
-        if (data.hasOwnProperty('artists')) {
-          setData([...data.artists.items, { type: 'artists' }]);
-        } else if (data.hasOwnProperty('albums')) {
-          setData({ 'albums': { ...data.albums.items } });
-        } else if (data.hasOwnProperty('tracks')) {
-          setData({ 'tracks': [...data.tracks.items] });
-        } else {
-          setData({ 'playlists': { ...data.playlists.items } });
+        for (let key in data) {
+          setData(data[key].items)
+          setType(key);
         }
       })
       .catch(err => {
@@ -80,16 +75,7 @@ function Root() {
     <div className={styles.root}>
       <h1>Spotify APP</h1>
       <Form handleChange={handleChange} handleClick={handleClick} handleSelect={handleSelect} />
-      {data && data.map((record) => {
-        if (index < 5) {
-          return <Card data={data} artist key={1} />
-        }
-      })}
-      {data.tracks && data.tracks.map((track, index) => {
-        if (index < 5) {
-          return <Card data={track} track key={track.id} />
-        }
-      })}
+      {data && <List data={data} type={type} />}
     </div>
   );
 }
